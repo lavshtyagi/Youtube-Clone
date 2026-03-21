@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { VideoItem } from "../utils/types";
 import { Youtube_url } from "../utils/constant";
+import { Sidebar } from "./Sidebar";
 
 // Helper: format large numbers like "1.2M views"
 const formatViews = (count: string) => {
@@ -46,7 +47,9 @@ export const WatchPage = () => {
   }, [videoId]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-4 max-w-screen-xl mx-auto">
+    <div className="flex min-h-screen">
+      <Sidebar />
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 p-4 max-w-screen-xl mx-auto overflow-x-hidden">
       {/* ── Left: Player + Info ─────────────────────────── */}
       <div className="flex-1 min-w-0">
         {/* Back button */}
@@ -145,6 +148,7 @@ export const WatchPage = () => {
               ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
