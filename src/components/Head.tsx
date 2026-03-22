@@ -10,8 +10,13 @@ export const Head: React.FC = () => {
   const [inputVal, setInputVal] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(setSearchQuery(inputVal.trim()));
+    e.preventDefault(); // still allows Enter key to work
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputVal(val);
+    dispatch(setSearchQuery(val.trim())); // fires on every keystroke → debounced in VedioContainer
     navigate("/");
   };
 
@@ -47,7 +52,7 @@ export const Head: React.FC = () => {
       >
         <input
           value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
+          onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-l-full text-sm focus:outline-none focus:border-blue-400"
           type="text"
           placeholder="Search"

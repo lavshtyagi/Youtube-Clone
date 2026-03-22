@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Youtube_url, Youtube_search_url } from "../utils/constant";
 import type { VideoItem, RootState } from "../utils/types";
@@ -49,23 +49,31 @@ export const VedioContainer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  // ── Cache: stores results by query so repeat searches skip the API ──
+  const cache = useRef<Record<string, VideoItem[]>>({});
+
   const searchQuery = useSelector((store: RootState) => store.app.searchQuery);
 
   useEffect(() => {
     const fetchVideos = async () => {
+      // ── Cache HIT: return instantly, no API call, no loading state ──
+      const cacheKey = searchQuery || "__trending__";
+      if (cache.current[cacheKey]) {
+        setVideos(cache.current[cacheKey]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(false);
       try {
-        let url = Youtube_url;
         let items: VideoItem[] = [];
 
         if (searchQuery) {
-          // Search API returns a slightly different shape — id is an object
-          url = Youtube_search_url + encodeURIComponent(searchQuery);
+          const url = Youtube_search_url + encodeURIComponent(searchQuery);
           const res = await fetch(url);
           const json = await res.json();
           if (json.error || !json.items) throw new Error("API error");
-          // Map search results to VideoItem-like shape
           items = (json.items as any[]).map((item: any) => ({
             kind: item.kind,
             etag: item.etag,
@@ -75,12 +83,13 @@ export const VedioContainer = () => {
             contentDetails: { duration: "", definition: "", caption: "" },
           }));
         } else {
-          const res = await fetch(url);
+          const res = await fetch(Youtube_url);
           const json = await res.json();
           if (json.error || !json.items) throw new Error("API error");
           items = json.items as VideoItem[];
         }
 
+        cache.current[cacheKey] = items; // ── Cache WRITE: store for next time ──
         setVideos(items);
       } catch {
         setError(true);
@@ -90,7 +99,13 @@ export const VedioContainer = () => {
       }
     };
 
-    fetchVideos();
+    // ── Debounce: wait 500ms after the user stops typing before calling the API ──
+    const timer = setTimeout(() => {
+      fetchVideos();
+    }, searchQuery ? 500 : 0); // no delay for the initial trending load (empty query)
+
+    return () => clearTimeout(timer); // cleanup: cancel if searchQuery changes again within 500ms
+
   }, [searchQuery]);
 
   return (

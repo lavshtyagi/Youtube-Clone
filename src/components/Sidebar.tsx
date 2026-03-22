@@ -6,7 +6,7 @@ export const Sidebar = () => {
   if (!isMenuOpen) return null;
 
   return (
-    <div className="p-5 shadow-lg w-48 h-full flex flex-col overflow-y-auto">
+    <div className="sticky top-[57px] self-start h-[calc(100vh-57px)] overflow-y-auto p-5 shadow-lg w-48 flex flex-col scrollbar-hide">
       {/* Top Section */}
       <ul className="mb-4 space-y-1">
         <li className="flex items-center gap-3 font-bold cursor-pointer px-2 py-1.5 rounded-lg bg-gray-100">🏠 Home</li>

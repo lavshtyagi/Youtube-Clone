@@ -9,8 +9,10 @@ Live data is powered by the **YouTube Data API v3**.
 ## ✨ Features
 
 - 🏠 **Home Feed** — Fetches the top 50 trending videos in India via the YouTube API
-- 🔍 **Search** — Type a query and press Enter to search YouTube in real time
+- 🔍 **Search** — Type a query and real-time debounced search calls the YouTube API
+- ⚡ **Search Caching** — Stores previous searches in a `useRef` cache for instant loading without rebill API
 - 🎬 **Watch Page** — Click any video to open it in a full embedded player (`/watch/:videoId`)
+- 💬 **N-Level Nested Comments** — Recursive comment component supporting infinite depth replies on watch page
 - 📋 **Up Next Panel** — Recommended videos listed alongside the player
 - 🗂️ **Collapsible Sidebar** — Hamburger toggle works on both the home and watch pages
 - 🏷️ **Category Chips** — Filter bar with active highlighting (All, Music, Gaming, News …)
@@ -31,9 +33,10 @@ src/
 │   ├── MainContainer.tsx  # Category chips + video grid
 │   ├── ButtonList.tsx     # Scrollable category filter bar
 │   ├── Button.tsx         # Individual chip with active state
-│   ├── VedioContainer.tsx # Fetches & renders video grid (trending / search)
+│   ├── VedioContainer.tsx # Fetches & renders video grid (trending / search + cache)
 │   ├── Vediocard.tsx      # Single video card with thumbnail, views, time
-│   └── WatchPage.tsx      # Video player page with iframe + Up Next panel
+│   ├── WatchPage.tsx      # Video player page with iframe + Up Next panel
+│   └── CommentSection.tsx # Recursive n-level nested comment UI
 ├── utils/
 │   ├── store.tsx          # Redux store
 │   ├── appslice.tsx       # Redux slice — isMenuOpen, searchQuery

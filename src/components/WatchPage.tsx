@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import type { VideoItem } from "../utils/types";
 import { Youtube_url } from "../utils/constant";
 import { Sidebar } from "./Sidebar";
+import { CommentSection } from "./CommentSection";
 
 // Helper: format large numbers like "1.2M views"
 const formatViews = (count: string) => {
@@ -95,6 +96,9 @@ export const WatchPage = () => {
               💾 Save
             </button>
           </div>
+
+          {/* ── Comment Section (n-level nested) ── */}
+          <CommentSection />
         </div>
       </div>
 

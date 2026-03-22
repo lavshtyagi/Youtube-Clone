@@ -53,3 +53,16 @@ export interface AppState {
 export interface RootState {
   app: AppState;
 }
+
+// ─── Comment Types (n-level nesting) ───────────────────────────────────────
+
+export interface Comment {
+  id: string;
+  author: string;
+  avatar: string;         // initials or image url
+  text: string;
+  likes: number;
+  publishedAt: string;
+  replies?: Comment[];    // ← same type → supports infinite depth
+}
+
