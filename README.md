@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# 📺 YouTube Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A feature-rich static web app that replicates the core YouTube experience — built with **React 19**, **TypeScript**, **Vite**, **TailwindCSS v4**, and **Redux Toolkit**.
 
-Currently, two official plugins are available:
+Live data is powered by the **YouTube Data API v3**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🏠 **Home Feed** — Fetches the top 50 trending videos in India via the YouTube API
+- 🔍 **Search** — Type a query and press Enter to search YouTube in real time
+- 🎬 **Watch Page** — Click any video to open it in a full embedded player (`/watch/:videoId`)
+- 📋 **Up Next Panel** — Recommended videos listed alongside the player
+- 🗂️ **Collapsible Sidebar** — Hamburger toggle works on both the home and watch pages
+- 🏷️ **Category Chips** — Filter bar with active highlighting (All, Music, Gaming, News …)
+- ⏳ **Loading Skeletons** — Shimmer placeholders while videos are being fetched
+- 🛡️ **API Fallback** — Mock video cards shown automatically if the API quota is exceeded
+- 📱 **Responsive** — Grid collapses from 4 columns → 1 column on mobile
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🗂️ Project Structure
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/
+│   ├── Head.tsx           # Sticky navbar — search, logo, hamburger, mic, bell
+│   ├── Body.tsx           # Sidebar + MainContainer layout
+│   ├── Sidebar.tsx        # Collapsible sidebar (Redux-driven)
+│   ├── MainContainer.tsx  # Category chips + video grid
+│   ├── ButtonList.tsx     # Scrollable category filter bar
+│   ├── Button.tsx         # Individual chip with active state
+│   ├── VedioContainer.tsx # Fetches & renders video grid (trending / search)
+│   ├── Vediocard.tsx      # Single video card with thumbnail, views, time
+│   └── WatchPage.tsx      # Video player page with iframe + Up Next panel
+├── utils/
+│   ├── store.tsx          # Redux store
+│   ├── appslice.tsx       # Redux slice — isMenuOpen, searchQuery
+│   ├── constant.ts        # YouTube API URLs
+│   └── types.ts           # Shared TypeScript interfaces
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Tech Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + Vite |
+| Language | TypeScript |
+| Styling | TailwindCSS v4 |
+| State | Redux Toolkit |
+| Routing | React Router DOM v7 |
+| API | YouTube Data API v3 |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/lavshtyagi/Youtube-Clone.git
+cd Youtube-Clone
 ```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Set up your API key
+
+Create a `.env` file in the root:
+```env
+VITE_YOUTUBE_API_KEY=your_youtube_api_key_here
+```
+
+Get a free key from [Google Cloud Console](https://console.cloud.google.com/) → Enable **YouTube Data API v3**.
+
+### 4. Run locally
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 📐 Architecture — How Redux Drives the App
+
+```
+User types query → Head dispatches setSearchQuery("react")
+                        ↓
+              Redux Store updates searchQuery
+                        ↓
+         VedioContainer reads searchQuery via useSelector
+                        ↓
+         Calls YouTube Search API → grid re-renders
+```
+
+Two Redux state values power the entire app:
+
+| State | Set by | Read by |
+|---|---|---|
+| `isMenuOpen` | `Head` (hamburger click) | `Sidebar` (show/hide) |
+| `searchQuery` | `Head` (search submit) | `VedioContainer` (API call) |
+
+---
+
+## 📸 Pages
+
+| Route | Description |
+|---|---|
+| `/` | Home feed with trending videos and search |
+| `/watch/:videoId` | Embedded video player with Up Next panel |
