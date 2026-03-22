@@ -1,5 +1,7 @@
 # 📺 YouTube Clone
 
+🚀 **Live Demo:** [https://youtube-clone-xi-pied.vercel.app/](https://youtube-clone-xi-pied.vercel.app/)
+
 A feature-rich static web app that replicates the core YouTube experience — built with **React 19**, **TypeScript**, **Vite**, **TailwindCSS v4**, and **Redux Toolkit**.
 
 Live data is powered by the **YouTube Data API v3**.
