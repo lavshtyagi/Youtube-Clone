@@ -1,8 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { Youtube_url, Youtube_search_url } from "../utils/constant";
-import type { VideoItem, RootState } from "../utils/types";
+import { Youtube_search_url, Youtube_url } from "../utils/constant";
+import type { RootState, VideoItem, VideoSnippet } from "../utils/types";
 import { VedioCard } from "./Vediocard";
+
+interface YoutubeSearchItem {
+  kind: string;
+  etag: string;
+  id: { videoId?: string } | string;
+  snippet: VideoSnippet;
+}
+
+interface YoutubeSearchResponse {
+  error?: unknown;
+  items?: YoutubeSearchItem[];
+}
+
+interface YoutubeVideosResponse {
+  error?: unknown;
+  items?: VideoItem[];
+}
 
 // Mock data fallback if the API quota is exceeded
 const MOCK_VIDEOS: VideoItem[] = Array.from({ length: 12 }, (_, i) => ({
@@ -16,9 +33,21 @@ const MOCK_VIDEOS: VideoItem[] = Array.from({ length: 12 }, (_, i) => ({
     description: "Mock description",
     publishedAt: new Date(Date.now() - i * 86400000 * 3).toISOString(),
     thumbnails: {
-      default: { url: `https://picsum.photos/seed/${i + 10}/120/90`, width: 120, height: 90 },
-      medium: { url: `https://picsum.photos/seed/${i + 10}/320/180`, width: 320, height: 180 },
-      high: { url: `https://picsum.photos/seed/${i + 10}/480/360`, width: 480, height: 360 },
+      default: {
+        url: `https://picsum.photos/seed/${i + 10}/120/90`,
+        width: 120,
+        height: 90,
+      },
+      medium: {
+        url: `https://picsum.photos/seed/${i + 10}/320/180`,
+        width: 320,
+        height: 180,
+      },
+      high: {
+        url: `https://picsum.photos/seed/${i + 10}/480/360`,
+        width: 480,
+        height: 360,
+      },
     },
   },
   statistics: {
@@ -32,13 +61,13 @@ const MOCK_VIDEOS: VideoItem[] = Array.from({ length: 12 }, (_, i) => ({
 
 const SkeletonCard = () => (
   <div className="animate-pulse">
-    <div className="bg-gray-200 rounded-xl w-full aspect-video" />
-    <div className="flex gap-2 mt-3">
-      <div className="w-9 h-9 bg-gray-200 rounded-full flex-shrink-0" />
+    <div className="aspect-video w-full rounded-xl bg-gray-200" />
+    <div className="mt-3 flex gap-2">
+      <div className="h-9 w-9 flex-shrink-0 rounded-full bg-gray-200" />
       <div className="flex-1 space-y-2">
-        <div className="h-3 bg-gray-200 rounded w-full" />
-        <div className="h-3 bg-gray-200 rounded w-4/5" />
-        <div className="h-3 bg-gray-200 rounded w-1/2" />
+        <div className="h-3 w-full rounded bg-gray-200" />
+        <div className="h-3 w-4/5 rounded bg-gray-200" />
+        <div className="h-3 w-1/2 rounded bg-gray-200" />
       </div>
     </div>
   </div>
@@ -49,14 +78,13 @@ export const VedioContainer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // ── Cache: stores results by query so repeat searches skip the API ──
+  // Cache: stores results by query so repeat searches skip the API
   const cache = useRef<Record<string, VideoItem[]>>({});
 
   const searchQuery = useSelector((store: RootState) => store.app.searchQuery);
 
   useEffect(() => {
     const fetchVideos = async () => {
-      // ── Cache HIT: return instantly, no API call, no loading state ──
       const cacheKey = searchQuery || "__trending__";
       if (cache.current[cacheKey]) {
         setVideos(cache.current[cacheKey]);
@@ -66,30 +94,44 @@ export const VedioContainer = () => {
 
       setLoading(true);
       setError(false);
+
       try {
         let items: VideoItem[] = [];
 
         if (searchQuery) {
           const url = Youtube_search_url + encodeURIComponent(searchQuery);
           const res = await fetch(url);
-          const json = await res.json();
-          if (json.error || !json.items) throw new Error("API error");
-          items = (json.items as any[]).map((item: any) => ({
+          const json: YoutubeSearchResponse = await res.json();
+
+          if (json.error || !json.items) {
+            throw new Error("API error");
+          }
+
+          items = json.items.map((item) => ({
             kind: item.kind,
             etag: item.etag,
-            id: item.id?.videoId || item.id,
+            id: typeof item.id === "string" ? item.id : item.id.videoId || "",
             snippet: item.snippet,
-            statistics: { viewCount: "–", likeCount: "–", commentCount: "–", favoriteCount: "0" },
+            statistics: {
+              viewCount: "–",
+              likeCount: "–",
+              commentCount: "–",
+              favoriteCount: "0",
+            },
             contentDetails: { duration: "", definition: "", caption: "" },
           }));
         } else {
           const res = await fetch(Youtube_url);
-          const json = await res.json();
-          if (json.error || !json.items) throw new Error("API error");
-          items = json.items as VideoItem[];
+          const json: YoutubeVideosResponse = await res.json();
+
+          if (json.error || !json.items) {
+            throw new Error("API error");
+          }
+
+          items = json.items;
         }
 
-        cache.current[cacheKey] = items; // ── Cache WRITE: store for next time ──
+        cache.current[cacheKey] = items;
         setVideos(items);
       } catch {
         setError(true);
@@ -99,29 +141,31 @@ export const VedioContainer = () => {
       }
     };
 
-    // ── Debounce: wait 500ms after the user stops typing before calling the API ──
     const timer = setTimeout(() => {
       fetchVideos();
-    }, searchQuery ? 500 : 0); // no delay for the initial trending load (empty query)
+    }, searchQuery ? 500 : 0);
 
-    return () => clearTimeout(timer); // cleanup: cancel if searchQuery changes again within 500ms
-
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
   return (
     <div className="p-4">
       {searchQuery && !loading && (
-        <h2 className="text-base font-semibold text-gray-700 mb-4">
+        <h2 className="mb-4 text-base font-semibold text-gray-700">
           Results for <span className="text-black">"{searchQuery}"</span>
           {error && (
-            <span className="ml-2 text-xs text-orange-500 font-normal">(showing mock results — API quota exceeded)</span>
+            <span className="ml-2 text-xs font-normal text-orange-500">
+              (showing mock results - API quota exceeded)
+            </span>
           )}
         </h2>
       )}
       {error && !searchQuery && (
-        <p className="text-xs text-orange-500 mb-3">⚠ API quota exceeded — showing sample videos.</p>
+        <p className="mb-3 text-xs text-orange-500">
+          ⚠ API quota exceeded - showing sample videos.
+        </p>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-6">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
           : videos.map((video) => (

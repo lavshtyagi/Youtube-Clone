@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { Comment } from "../utils/types";
 
-// ─── Sample Comments (n-level deep nesting) ────────────────────────────────
-
+// Sample Comments (n-level deep nesting)
 const SAMPLE_COMMENTS: Comment[] = [
   {
     id: "1",
@@ -140,35 +139,49 @@ const SAMPLE_COMMENTS: Comment[] = [
   },
 ];
 
-// ─── Avatar colours based on first letter ─────────────────────────────────
-
+// Avatar colours based on first letter
 const AVATAR_COLORS: Record<string, string> = {
-  A: "bg-red-500",    B: "bg-pink-500",   C: "bg-purple-500",
-  D: "bg-indigo-500", E: "bg-blue-500",   F: "bg-cyan-500",
-  G: "bg-teal-500",   H: "bg-green-500",  I: "bg-lime-500",
-  J: "bg-yellow-500", K: "bg-orange-500", L: "bg-red-400",
-  M: "bg-rose-500",   N: "bg-fuchsia-500",O: "bg-violet-500",
-  P: "bg-sky-500",    Q: "bg-emerald-500",R: "bg-amber-500",
-  S: "bg-indigo-400", T: "bg-blue-400",   U: "bg-green-400",
-  V: "bg-purple-400", W: "bg-pink-400",   X: "bg-cyan-400",
-  Y: "bg-red-600",    Z: "bg-teal-600",
+  A: "bg-red-500",
+  B: "bg-pink-500",
+  C: "bg-purple-500",
+  D: "bg-indigo-500",
+  E: "bg-blue-500",
+  F: "bg-cyan-500",
+  G: "bg-teal-500",
+  H: "bg-green-500",
+  I: "bg-lime-500",
+  J: "bg-yellow-500",
+  K: "bg-orange-500",
+  L: "bg-red-400",
+  M: "bg-rose-500",
+  N: "bg-fuchsia-500",
+  O: "bg-violet-500",
+  P: "bg-sky-500",
+  Q: "bg-emerald-500",
+  R: "bg-amber-500",
+  S: "bg-indigo-400",
+  T: "bg-blue-400",
+  U: "bg-green-400",
+  V: "bg-purple-400",
+  W: "bg-pink-400",
+  X: "bg-cyan-400",
+  Y: "bg-red-600",
+  Z: "bg-teal-600",
 };
 
 const getAvatarColor = (letter: string) =>
   AVATAR_COLORS[letter.toUpperCase()] ?? "bg-gray-500";
 
-// ─── Recursive CommentCard ─────────────────────────────────────────────────
-
+// Recursive CommentCard
 interface CommentCardProps {
   comment: Comment;
   depth?: number;
 }
 
 const CommentCard = ({ comment, depth = 0 }: CommentCardProps) => {
-  const [showReplies, setShowReplies] = useState(depth < 1); // auto-expand first level
+  const [showReplies, setShowReplies] = useState(depth < 1);
   const hasReplies = comment.replies && comment.replies.length > 0;
 
-  // Cap visual indentation at 4 levels so comments don't get too narrow
   const indent = Math.min(depth, 4) * 36;
 
   return (
@@ -176,41 +189,40 @@ const CommentCard = ({ comment, depth = 0 }: CommentCardProps) => {
       <div className="flex gap-3">
         {/* Avatar */}
         <div
-          className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
-            text-white text-sm font-bold ${getAvatarColor(comment.avatar)}`}
+          className={`flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white ${getAvatarColor(comment.avatar)}`}
         >
           {comment.avatar}
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
-          {/* Author + time */}
+        <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold text-gray-900">{comment.author}</span>
+            <span className="text-sm font-semibold text-gray-900">
+              {comment.author}
+            </span>
             <span className="text-xs text-gray-400">{comment.publishedAt}</span>
           </div>
 
-          {/* Comment text */}
-          <p className="text-sm text-gray-800 mt-0.5 leading-relaxed">{comment.text}</p>
+          <p className="mt-0.5 text-sm leading-relaxed text-gray-800">
+            {comment.text}
+          </p>
 
-          {/* Actions row */}
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-            <button className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+          <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+            <button className="flex items-center gap-1 transition-colors hover:text-gray-800">
               👍 <span>{comment.likes.toLocaleString()}</span>
             </button>
-            <button className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+            <button className="flex items-center gap-1 transition-colors hover:text-gray-800">
               👎
             </button>
-            <button className="font-semibold hover:text-gray-800 transition-colors">
+            <button className="font-semibold transition-colors hover:text-gray-800">
               Reply
             </button>
           </div>
 
-          {/* Toggle replies button */}
           {hasReplies && (
             <button
               onClick={() => setShowReplies((v) => !v)}
-              className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
+              className="mt-2 flex items-center gap-1 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-800"
             >
               {showReplies ? "▲" : "▼"}
               {showReplies
@@ -221,9 +233,8 @@ const CommentCard = ({ comment, depth = 0 }: CommentCardProps) => {
         </div>
       </div>
 
-      {/* ── Recursive: render replies ── */}
       {hasReplies && showReplies && (
-        <div className="border-l-2 border-gray-100 ml-4 pl-1">
+        <div className="ml-4 border-l-2 border-gray-100 pl-1">
           {comment.replies!.map((reply) => (
             <CommentCard key={reply.id} comment={reply} depth={depth + 1} />
           ))}
@@ -233,31 +244,26 @@ const CommentCard = ({ comment, depth = 0 }: CommentCardProps) => {
   );
 };
 
-// ─── CommentSection ────────────────────────────────────────────────────────
-
+// CommentSection
 export const CommentSection = () => {
   return (
     <div className="mt-8">
-      {/* Header */}
-      <h2 className="text-lg font-bold text-gray-900 mb-6">
+      <h2 className="mb-6 text-lg font-bold text-gray-900">
         {SAMPLE_COMMENTS.length + 3} Comments
       </h2>
 
-      {/* Add comment box */}
-      <div className="flex gap-3 mb-8">
-        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-          flex items-center justify-center text-white text-sm font-bold">
+      <div className="mb-8 flex gap-3">
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-bold text-white">
           U
         </div>
         <input
           type="text"
           placeholder="Add a comment…"
-          className="flex-1 border-b border-gray-300 focus:border-blue-500 focus:outline-none
-            text-sm py-1 bg-transparent placeholder-gray-400 transition-colors"
+          className="flex-1 border-b border-gray-300 bg-transparent py-1 text-sm placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none"
         />
       </div>
 
-      {/* Comment list — recursive */}
+      {/* Comment list - recursive */}
       <div className="space-y-1 divide-y divide-gray-100">
         {SAMPLE_COMMENTS.map((comment) => (
           <div key={comment.id} className="pt-1">

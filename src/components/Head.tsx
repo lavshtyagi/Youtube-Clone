@@ -10,13 +10,13 @@ export const Head: React.FC = () => {
   const [inputVal, setInputVal] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault(); // still allows Enter key to work
+    e.preventDefault();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInputVal(val);
-    dispatch(setSearchQuery(val.trim())); // fires on every keystroke → debounced in VedioContainer
+    dispatch(setSearchQuery(val.trim()));
     navigate("/");
   };
 
@@ -27,13 +27,12 @@ export const Head: React.FC = () => {
   };
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between px-5 py-3 bg-white shadow-sm border-b border-gray-200">
-
-      {/* Left — hamburger + logo */}
-      <div className="flex items-center gap-4 flex-shrink-0">
+    <div className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-5 py-3 shadow-sm">
+      {/* Left - hamburger + logo */}
+      <div className="flex flex-shrink-0 items-center gap-4">
         <img
           onClick={() => dispatch(toggleMenu())}
-          className="h-6 cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+          className="h-6 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
           alt="menu"
           src={menu}
         />
@@ -45,40 +44,40 @@ export const Head: React.FC = () => {
         />
       </div>
 
-      {/* Center — search bar */}
+      {/* Center - search bar */}
       <form
         onSubmit={handleSearch}
-        className="flex items-center flex-1 max-w-xl mx-6"
+        className="mx-6 flex flex-1 items-center max-w-xl"
       >
         <input
           value={inputVal}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-l-full text-sm focus:outline-none focus:border-blue-400"
+          className="w-full rounded-l-full border border-gray-300 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
           type="text"
           placeholder="Search"
         />
         <button
           type="submit"
-          className="px-5 py-2 border border-l-0 border-gray-300 rounded-r-full bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600"
+          className="border border-l-0 border-gray-300 bg-gray-50 px-5 py-2 text-gray-600 transition-colors hover:bg-gray-100 rounded-r-full"
         >
           🔍
         </button>
         <button
           type="button"
-          className="ml-3 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-base"
+          className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-base transition-colors hover:bg-gray-200"
           title="Search with voice"
         >
           🎤
         </button>
       </form>
 
-      {/* Right — notifications + avatar */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-xl">
+      {/* Right - notifications + avatar */}
+      <div className="flex flex-shrink-0 items-center gap-3">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full text-xl transition-colors hover:bg-gray-100">
           🔔
         </button>
         <img
-          className="h-8 w-8 rounded-full cursor-pointer ring-2 ring-gray-200 hover:ring-blue-400 transition-all object-cover"
+          className="h-8 w-8 cursor-pointer rounded-full object-cover ring-2 ring-gray-200 transition-all hover:ring-blue-400"
           alt="user icon"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ58xgID2kKLNcPm1kCdBRAI_UZo1WY7tJtnA&s"
         />
